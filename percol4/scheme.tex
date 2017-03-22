@@ -1,0 +1,176 @@
+\documentclass[12pt]{article}
+\usepackage[margin=2cm]{geometry}
+%\usepackage{concmath}
+\usepackage{lmodern}
+\usepackage{euler}
+\usepackage{amsmath}
+\usepackage{tikz}
+%\usepackage[scaled=0.85]{beramono}
+%\usepackage{libertine}
+%\usepackage{bold-extra}
+\usetikzlibrary{arrows}
+\parindent0pt
+
+\newlength\dxa\dxa=3cm
+\begin{document}
+
+Node $m,n$ has number $v=m+Mn$ ($m$ is row number, $n$ is column number). 
+Node number $v$ has coordinates $v\%M,v/M$.
+Nodes $0\dots M{-}1$ are left contacts, biased $1$.
+Nodes $(N{-}1)M\dots MN{-}1$ are right contacts, grounded at $0$.
+
+\medskip
+R-edge $m,n$ has number $m{+}Mn$, R-edges with $n=N{-}1$ are zero.
+D-edge $m,n$ has number $m{+}Mn$, D-edges with $n=0$, $n=N{-}1$, 
+or $m=M{-}1$ are zero.
+Total number of potentially non-zero edges is $M(N{-}1)$ R-edges plus
+$(M{-}1)(N{-}2)$ D-edges, that is $2MN{-}3M{-}N{+}3$.
+
+\medskip
+R-edge $m,n$ flows from node $m,n$ to node $m,n{+}1$ (from node $e$ to node $e{+}M$).
+D-edge $m,n$ flows from node $m,n$ to node $m{+}1,n$ (from node $e$ to node $e{+}1$).
+
+\vspace{2cm}
+
+\tikzset{
+v/.style={draw,rectangle,rounded corners,fill=lightgray},
+e/.style={->, >=stealth},
+}
+
+\begin{tikzpicture}%[xscale=4,yscale=2]
+
+\node[v] (00) at (0,0) {$0,0$};
+\node[v] (01) at (1\dxa,0) {$0,1$};
+\node[v] (02) at (2\dxa,0) {$0,2$};
+\node[v] (0x) at (3\dxa,0) {$\cdots$};
+\node[v] (0y) at (4\dxa,0) {$0,N{-}2$};
+\node[v] (0z) at (5\dxa,0) {$0,N{-}1$};
+\draw[e] (00) -- (01);
+\draw[e] (01) -- (02);
+\draw[e] (02) -- (0x);
+\draw[e] (0x) -- (0y);
+\draw[e] (0y) -- (0z);
+
+\node[v] (10) at (0,-2) {$1,0$};
+\node[v] (11) at (1\dxa,-2) {$1,1$};
+\node[v] (12) at (2\dxa,-2) {$1,2$};
+\node[v] (1x) at (3\dxa,-2) {$\cdots$};
+\node[v] (1y) at (4\dxa,-2) {$1,N{-}2$};
+\node[v] (1z) at (5\dxa,-2) {$1,N{-}1$};
+\draw[e] (10) -- (11);
+\draw[e] (11) -- (12);
+\draw[e] (12) -- (1x);
+\draw[e] (1x) -- (1y);
+\draw[e] (1y) -- (1z);
+
+\node[v] (t0) at (0,-4) {$\vdots$};
+\node[v] (t1) at (1\dxa,-4) {$\vdots$};
+\node[v] (t2) at (2\dxa,-4) {$\vdots$};
+\node[v] (tx) at (3\dxa,-4) {$\ddots$};
+\node[v] (ty) at (4\dxa,-4) {$\vdots$};
+\node[v] (tz) at (5\dxa,-4) {$\vdots$};
+\draw[e] (t0) -- (t1);
+\draw[e] (t1) -- (t2);
+\draw[e] (t2) -- (tx);
+\draw[e] (tx) -- (ty);
+\draw[e] (ty) -- (tz);
+
+\node[v] (z0) at (0,-6) {$M{-}1,0$};
+\node[v] (z1) at (1\dxa,-6) {$M{-}1,1$};
+\node[v] (z2) at (2\dxa,-6) {$M{-}1,2$};
+\node[v] (zx) at (3\dxa,-6) {$\cdots$};
+\node[v] (zy) at (4\dxa,-6) {$M{-}1,N{-}2$};
+\node[v] (zz) at (5\dxa,-6) {$M{-}1,N{-}1$};
+\draw[e] (z0) -- (z1);
+\draw[e] (z1) -- (z2);
+\draw[e] (z2) -- (zx);
+\draw[e] (zx) -- (zy);
+\draw[e] (zy) -- (zz);
+
+\draw[e] (01) -- node[left]{$0,1$} (11);
+\draw[e] (11) -- node[left]{$1,1$} (t1);
+\draw[e] (t1) -- node[left]{$M{-}2,1$} (z1);
+\draw[e] (02) -- node[left]{$0,2$} (12);
+\draw[e] (12) -- node[left]{$1,2$} (t2);
+\draw[e] (t2) -- node[left]{$M{-}2,2$} (z2);
+\draw[e] (0x) -- (1x);
+\draw[e] (1x) -- (tx);
+\draw[e] (tx) -- (zx);
+\draw[e] (0y) -- node[left]{$0,N{-}2$} (1y);
+\draw[e] (1y) -- node[left]{$1,N{-2}$} (ty);
+\draw[e] (ty) -- node[left]{$M{-}2,N{-}2$} (zy);
+\end{tikzpicture}
+
+\vskip1cm
+There is a conducting path, possibly consisting of a few clusters.
+
+We denote $V$ the set of nodes in conducting path,
+including nodes of the left and right contacts, 
+and non-contact nodes. The nodes are connected by 
+a set $E$ of non-zero edges.
+
+Let $S_{ev}=\{\pm1|0\}$ be $|E|\times|V|$ connectivity matrix: 
+\begin{equation}
+S_{ev} = \left\{
+\begin{array}{rl}
++1&\mbox{if edge $e$ exits node $v$},\\
+-1&\mbox{if edge $e$ enters node $v$},\\
+0&\mbox{otherwise.}
+\end{array}
+\right.
+\end{equation}
+
+Voltage drop on the edges is $\Delta=SV$, and Ohm's law gives 
+currents in the edges $C=Q\Delta$, where $Q$ is 
+$|E|\times|E|$ diagonal matrix with $Q_{ee}$ being 
+the conductivity $\sigma_e$ of edge $e$.
+
+The nodes $V$ divide into two subsets, unknown inner nodes $V_x$
+and defined contact nodes $V_d$. Matrix $S$ divides correspondingly:
+\begin{equation}
+\begin{pmatrix}QS_x&QS_d\end{pmatrix}
+\begin{pmatrix}V_x\\ V_d\end{pmatrix} = C
+\end{equation}
+
+The contact nodes supply current into the system, 
+but the inner nodes maintain zero net current
+each (the Kirchoff law), which is expressed as $S_x^\top C=0$, hence
+\begin{eqnarray}
+S^\top_xQS_xV_x &=& -S^\top_xQS_dV_d,\quad\mbox{or}\\
+AV_x&=&B.\label{eq:main}
+\end{eqnarray}
+
+The algorithm 
+to construct the lower-left triangle of the \emph{symmetric} matrix $A$
+and the rhs vector $B$ in \eqref{eq:main} is as follows.
+
+\iffalse
+A_{ab} = sum_e {
++[exits(e,a)][exits(e,b)]*sigma(e) 
+-[exits(e,a)][enters(e,b)]*sigma(e) 
+-[enters(e,a)][exits(e,b)]*sigma(e) 
++[enters(e,a)][enters(e,b)]*sigma(e) 
+}
+\fi
+
+\def\x#1{\hspace{#1cm}}
+\rule{\textwidth}{1pt}
+\bgroup\obeylines\ttfamily
+\textbf{def} A\_B($V_x$, $V_d$, $E$):
+\x1 A, B = 0, 0
+\x1 \textbf{for} e \textbf{in} $E$:
+\x2   a, b = ends(e):
+\x2   \textbf{if} a \textbf{not in} $V_x$: a, b = b, a
+\x2   \textbf{if} a \textbf{not in} $V_x$: \textbf{continue}
+\x2   A(a, a) += $\sigma_e$
+\x2   \textbf{if} b \textbf{in} $V_x$:
+\x3      A(b, b) += $\sigma_e$
+\x3      \textbf{if} a < b: a, b = b, a
+\x3      A(a, b) -= $\sigma_e$
+\x2   \textbf{else}:
+\x3      B(a) += $\sigma_e$ * volt(b)
+\x1 \textbf{return} A, B
+\egroup
+\rule{\textwidth}{1pt}
+
+\end{document}
