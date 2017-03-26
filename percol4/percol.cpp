@@ -19,12 +19,10 @@
 #if 1
 #define REAL float
 #define XPPSV sppsv
-#define XSPSV sspsv
 #define vxRngUniform vsRngUniform
 #else
 #define REAL double
 #define XPPSV dppsv
-#define XSPSV dspsv
 #define vxRngUniform vdRngUniform
 #endif
 
@@ -262,15 +260,6 @@ class Grid {
             vx.clear();
             for (Int i = 0; i < nx; ++i) {
                 vx.emplace(rc_xno[i], B[i]);
-            }
-        } else {
-            std::vector<Int> IPIV(nx);
-            Int ONERHS = 1;
-            Int INFO = 0;
-            XSPSV("L", &nx, &ONERHS, A.data(), IPIV.data(), B.data(), &nx, &INFO );
-            if (INFO) {
-                printf("INFO=%i\n", INFO);
-                return INFO;
             }
         }
         return 0;
