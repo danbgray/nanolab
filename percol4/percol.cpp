@@ -273,16 +273,22 @@ class Grid {
                     REAL v0 = c == 0 ? VLEFT : vx.at({r, c});
                     REAL v1 = c + 1 == N - 1 ? VRIGHT : vx.at({r, c + 1});
                     REAL deltav = v0 - v1;
-                    REAL current = std::abs(deltav * sigma);
-                    out << c << " " << M - 1 - r << " " << c + 1 << " " << M - 1 - r << " " << current << std::endl;
+                    REAL current = deltav * sigma;
+                    if (current > 0)
+                        out << c << " " << M - 1 - r << " " << c + 1 << " " << M - 1 - r << " " << current << std::endl;
+                    else
+                        out << c + 1 << " " << M - 1 - r << " " << c << " " << M - 1 - r << " " << -current << std::endl;
                 }
                 if (c > 0 && nodes[at(r, c)] && nodes[at(r + 1, c)] && down_edges[at(r, c)]) {
                     REAL sigma = 1.0 / down_edges[at(r, c)];
                     REAL v0 = vx.at({r, c});
                     REAL v1 = vx.at({r + 1, c});
                     REAL deltav = v0 - v1;
-                    REAL current = std::abs(deltav * sigma);
-                    out << c << " " << M - 1 - r << " " << c << " " << M - 1 - (r + 1) << " " << current << std::endl;
+                    REAL current = deltav * sigma;
+                    if (current > 0)
+                        out << c << " " << M - 1 - r << " " << c << " " << M - 1 - (r + 1) << " " << current << std::endl;
+                    else
+                        out << c << " " << M - 1 - (r + 1) << " " << c << " " << M - 1 - r << " " << -current << std::endl;
                 }
             }
         }
