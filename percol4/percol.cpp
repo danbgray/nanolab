@@ -264,7 +264,7 @@ class Grid {
         }
         return 0;
     }
-    void gnuplot_currents(const std::string& filename) {
+    void write_currents(const std::string& filename) {
         std::ofstream out(filename);
         for (Int c = 0; c < N - 1; ++c) {
             for (Int r = 0; r < M; ++r) {
@@ -421,7 +421,7 @@ void dwim1(Int M, Int N, Int seed, REAL frac1) {
         printf("currents = %lg|%lg (rel.defect=%lg) (%s)\n",
             lc, rc, (lc - rc) / std::max(std::abs(lc), std::abs(rc)),
             human_readable_time(seconds(t1 - t0)).c_str());
-        if (!failed) grid.gnuplot_currents("cur.dat");
+        if (!failed) grid.write_currents("cur.dat");
     }
 }
 
