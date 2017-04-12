@@ -26,10 +26,11 @@
 #define vxRngUniform vdRngUniform
 #endif
 
-#define Int MKL_INT
 #define USE_MKL_UNIFORM_RNG 1
-#define VLEFT 1.0
-#define VRIGHT 0.0
+typedef MKL_INT Int;
+const REAL VLEFT = 1.0;
+const REAL VRIGHT = 0.0;
+const Int BITVARNO = 0x80000000; // nodes[i] with this bit set number a variable
 
 typedef std::pair<Int,Int> RowCol;
 
@@ -56,8 +57,9 @@ class Grid {
     std::vector<Int> nodes;
     std::vector<REAL> right_edges;
     std::vector<REAL> down_edges;
-    std::map<RowCol, REAL> vx; // voltage at node[at(r, c)]
+    std::vector<REAL> vx; // voltage at node[at(r, c)]
     Int at(Int m, Int n) const { return m + M * n; }
+    Int at(const RowCol& rc) const { return at(rc.first, rc.second); }
  public:
     Grid(Int _M, Int _N) : M(_M), N(_N)
     {
@@ -186,7 +188,6 @@ class Grid {
         }
     }
     Int solve_currents() {
-        const Int BITVARNO = 0x80000000;
         std::vector<REAL> A, B;
         std::map<Int, RowCol> rc_xno; // variable number -> row, col
         // Assign variable numbers to nodes
@@ -257,9 +258,10 @@ class Grid {
                 printf("INFO=%i\n", INFO);
                 return INFO;
             }
+            vx.reserve(M * N);
             vx.clear();
             for (Int i = 0; i < nx; ++i) {
-                vx.emplace(rc_xno[i], B[i]);
+                vx[at(rc_xno[i])] = B[i];
             }
         }
         return 0;
@@ -270,8 +272,8 @@ class Grid {
             for (Int r = 0; r < M; ++r) {
                 if (nodes[at(r, c)] && nodes[at(r, c + 1)] && right_edges[at(r, c)]) {
                     REAL sigma = 1.0 / right_edges[at(r, c)];
-                    REAL v0 = c == 0 ? VLEFT : vx.at({r, c});
-                    REAL v1 = c + 1 == N - 1 ? VRIGHT : vx.at({r, c + 1});
+                    REAL v0 = c == 0 ? VLEFT : vx[at(r, c)];
+                    REAL v1 = c + 1 == N - 1 ? VRIGHT : vx[at(r, c + 1)];
                     REAL deltav = v0 - v1;
                     REAL current = deltav * sigma;
                     if (current > 0)
@@ -281,8 +283,8 @@ class Grid {
                 }
                 if (c > 0 && nodes[at(r, c)] && nodes[at(r + 1, c)] && down_edges[at(r, c)]) {
                     REAL sigma = 1.0 / down_edges[at(r, c)];
-                    REAL v0 = vx.at({r, c});
-                    REAL v1 = vx.at({r + 1, c});
+                    REAL v0 = vx[at(r, c)];
+                    REAL v1 = vx[at(r + 1, c)];
                     REAL deltav = v0 - v1;
                     REAL current = deltav * sigma;
                     if (current > 0)
@@ -295,10 +297,10 @@ class Grid {
     }
     void write_voltages(const std::string& filename) {
         std::ofstream out(filename);
-        for (Int c = 0; c < N - 1; ++c) {
+        for (Int c = 0; c < N; ++c) {
             for (Int r = 0; r < M; ++r) {
                 if (nodes[at(r, c)]) {
-                    REAL v = c == 0 ? VLEFT : c == N -1 ? VRIGHT : vx.at({r, c});
+                    REAL v = c == 0 ? VLEFT : c == N - 1 ? VRIGHT : vx[at(r, c)];
                     out << c << " " << M - 1 - r << " " << v << std::endl;
                 }
             }
@@ -309,7 +311,7 @@ class Grid {
         for (Int r = 0; r < M; ++r) {
             if (nodes[at(r, 0)] && nodes[at(r, 1)] && right_edges[at(r, 0)]) {
                 REAL sigma = 1.0 / right_edges[at(r, 0)];
-                REAL deltav = VLEFT - vx.at({r, 1});
+                REAL deltav = VLEFT - vx[at(r, 1)];
                 res += deltav * sigma;
             }
         }
@@ -320,7 +322,7 @@ class Grid {
         for (Int r = 0; r < M; ++r) {
             if (nodes[at(r, N-2)] && nodes[at(r, N-1)] && right_edges[at(r, N-2)]) {
                 REAL sigma = 1.0 / right_edges[at(r, N - 2)];
-                REAL deltav = vx.at({r, N-2}) - VRIGHT;
+                REAL deltav = vx[at(r, N-2)] - VRIGHT;
                 res += deltav * sigma;
             }
         }
